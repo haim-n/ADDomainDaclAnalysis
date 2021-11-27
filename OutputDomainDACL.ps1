@@ -8,8 +8,14 @@ $generalOutput = "ADRootPermissionsAnalysis.txt"
 # delete existing file
 if (Test-Path $generalOutput) {Remove-Item $generalOutput}
 
-# import AD module
-Import-Module activedirectory
+# import AD module, exit script if the module doesn't exist
+Import-Module activedirectory -ErrorAction SilentlyContinue
+if (!(Get-Module activedirectory))
+{
+    Write-Host The Active Directory PowerShell module could not be imported.
+    Write-Host Please run the script on a machine with AD RSAT tools installed.
+    exit
+}
 
 # get all domains in the forst
 $Domains = (Get-ADForest).domains
