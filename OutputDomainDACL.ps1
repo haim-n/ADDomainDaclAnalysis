@@ -12,8 +12,8 @@ if (Test-Path $generalOutput) {Remove-Item $generalOutput}
 Import-Module activedirectory -ErrorAction SilentlyContinue
 if (!(Get-Module activedirectory))
 {
-    Write-Host The Active Directory PowerShell module could not be imported.
-    Write-Host Please run the script on a machine with AD RSAT tools installed.
+    Write-Host The Active Directory PowerShell module could not be imported. -ForegroundColor Yellow
+    Write-Host Please run the script on a machine with AD RSAT tools installed. -ForegroundColor Yellow
     exit
 }
 
@@ -31,7 +31,8 @@ foreach ($Domain in $Domains)
     $DomainRootPermissions = (Get-ADObject $DomainRootDN -Properties *).nTSecurityDescriptor.access
     # export to CSV
     $DomainRootPermissions | export-csv ($Domain + $RootCSV) -NoTypeInfo
-    "All permissions granted on the $Domain domain root object were exported into " + ($Domain + $RootCSV) +"`n" | Out-File $generalOutput -Append
+    Write-Host Exported $domain domain root object permissions into ($Domain + $RootCSV) -ForegroundColor Green
+    "All permissions granted on the $Domain domain root object were exported into " + ($Domain + $RootCSV) +"`n." | Out-File $generalOutput -Append
     # specifically check for overly permissive WriteDACL ACEs that were remediated in Exchange 2019 CU1, Exchange 2016 CU 12, Exchange 2013 CU22
     # see this for details: https://support.microsoft.com/en-us/topic/reducing-permissions-required-to-run-exchange-server-when-you-use-the-shared-permissions-model-e1972d47-d714-fd76-1fd5-7cdcb85408ed
     $PermissiveDomainRootPermissions = $DomainRootPermissions | ? {($_.ActiveDirectoryRights -like "*WriteDacl*") -and ($_.IdentityReference -eq "ESLAB\Exchange Windows Permissions") -and ($_.PropagationFlags -ne "InheritOnly")}
@@ -60,7 +61,8 @@ foreach ($Domain in $Domains)
     $AdminSDHolderPermissions = (Get-ADObject $AdminSDHolderDN -Properties *).nTSecurityDescriptor.access
     # export to CSV
     $AdminSDHolderPermissions | export-csv ($Domain + $AdminSDHolderCSV) -NoTypeInfo
-    "All permissions granted on the $Domain AdminSDHolder object were exported into " + ($Domain + $AdminSDHolderCSV) +"`n" | Out-File $generalOutput -Append
+    Write-Host Exported $domain AdminSDHolder object permissions into ($Domain + $AdminSDHolderCSV) -ForegroundColor Green
+    "All permissions granted on the $Domain AdminSDHolder object were exported into " + ($Domain + $AdminSDHolderCSV) +"`n." | Out-File $generalOutput -Append
     # specifically check for overly permissive WriteDACL ACE that was remediated in Exchange 2019 CU1, Exchange 2016 CU 12
     # see this for details: https://support.microsoft.com/en-us/topic/reducing-permissions-required-to-run-exchange-server-when-you-use-the-shared-permissions-model-e1972d47-d714-fd76-1fd5-7cdcb85408ed
     $PermissiveAdminSDHolderPermissions = $AdminSDHolderPermissions | ? {($_.ActiveDirectoryRights -like "*WriteDacl*") -and ($_.IdentityReference -eq "ESLAB\Exchange Trusted Subsystem")}
@@ -82,3 +84,4 @@ foreach ($Domain in $Domains)
     }    
     "========================`n" | Out-File $generalOutput -Append
 }
+Write-Host See the $generalOutput file for analysis of potentially overly permissive and risky Exchange permissions. -ForegroundColor Green
