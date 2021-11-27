@@ -8,6 +8,8 @@ https://support.microsoft.com/en-us/topic/reducing-permissions-required-to-run-e
 
 https://adsecurity.org/?p=4119 (🙏 Sean Metcalf).
 
+https://dirkjanm.io/abusing-exchange-one-api-call-away-from-domain-admin/ (🙏 Dirk-jan Mollema)
+
 Requires AD PowerShell module, from the RSAT toolbox, since it runs the "Get-ADObject" and "Get-ADForest" commands.
 
 Not thoroughly tested. No guarantees.
